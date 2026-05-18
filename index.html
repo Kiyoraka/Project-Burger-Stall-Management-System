@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BSMS — Burger Stall Management SaaS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%94%3C/text%3E%3C/svg%3E" />
+  <style>
+    [x-cloak] { display: none !important; }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 text-slate-800 font-sans antialiased">
+  <main class="min-h-screen flex flex-col items-center justify-center px-6 py-12">
+    <div class="w-full max-w-3xl flex flex-col items-center text-center">
+
+      <div class="mb-2 text-6xl" aria-hidden="true">🍔</div>
+      <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight text-orange-600">BSMS</h1>
+      <p class="mt-2 text-lg md:text-xl text-slate-600">Burger Stall Management SaaS</p>
+      <p class="mt-4 text-sm md:text-base text-slate-500">Built for Malaysian burger sellers</p>
+
+      <section class="mt-10 w-full grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <a href="./admin/login.html"
+           class="group flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 py-8 shadow-sm transition hover:shadow-md hover:border-orange-300 hover:-translate-y-0.5">
+          <span class="text-3xl mb-2" aria-hidden="true">🛡️</span>
+          <span class="text-lg font-semibold text-slate-800">Admin</span>
+          <span class="mt-1 text-sm text-orange-600 group-hover:text-orange-700">Login →</span>
+        </a>
+        <a href="./affiliate/login.html"
+           class="group flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 py-8 shadow-sm transition hover:shadow-md hover:border-orange-300 hover:-translate-y-0.5">
+          <span class="text-3xl mb-2" aria-hidden="true">🤝</span>
+          <span class="text-lg font-semibold text-slate-800">Affiliate</span>
+          <span class="mt-1 text-sm text-orange-600 group-hover:text-orange-700">Login →</span>
+        </a>
+        <a href="./seller/login.html"
+           class="group flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 py-8 shadow-sm transition hover:shadow-md hover:border-orange-300 hover:-translate-y-0.5">
+          <span class="text-3xl mb-2" aria-hidden="true">🧑‍🍳</span>
+          <span class="text-lg font-semibold text-slate-800">Seller</span>
+          <span class="mt-1 text-sm text-orange-600 group-hover:text-orange-700">Login →</span>
+        </a>
+      </section>
+
+      <div class="mt-10 flex flex-col items-center gap-2">
+        <p class="text-sm text-slate-500">View demo stall →</p>
+        <a href="./site/index.html?seller=zaid-burger"
+           class="inline-flex items-center gap-2 rounded-full bg-orange-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-orange-700">
+          bsms.app/s/zaid-burger
+          <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+
+      <footer class="mt-16 text-xs text-slate-400">
+        © BSMS 2026
+      </footer>
+    </div>
+  </main>
+</body>
+</html>
