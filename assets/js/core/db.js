@@ -746,6 +746,71 @@
     }
   };
 
+  // ---------- _meta (export / import / reset) ----------
+
+  const COLLECTIONS = ['admins', 'affiliates', 'users', 'orders', 'products', 'leads', 'flags', 'landings'];
+
+  const _meta = {
+    collections: COLLECTIONS.slice(),
+
+    exportJson: function () {
+      const out = {
+        version: parseInt(localStorage.getItem('bsms.version') || '1', 10),
+        exportedAt: nowIso()
+      };
+      COLLECTIONS.forEach(function (name) {
+        out[name] = read(name);
+      });
+      return JSON.stringify(out, null, 2);
+    },
+
+    importJson: function (jsonString) {
+      let parsed;
+      try {
+        parsed = typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
+      } catch (e) {
+        throw new Error('db._meta.importJson: invalid JSON - ' + (e && e.message));
+      }
+      if (!parsed || typeof parsed !== 'object') {
+        throw new Error('db._meta.importJson: payload must be an object');
+      }
+      COLLECTIONS.forEach(function (name) {
+        if (Array.isArray(parsed[name])) {
+          write(name, parsed[name]);
+        }
+      });
+      if (parsed.version) {
+        try { localStorage.setItem('bsms.version', String(parsed.version)); } catch (e) {}
+      }
+      try { localStorage.setItem('bsms.seeded', '1'); } catch (e) {}
+      fire('_meta', 'import', { collections: COLLECTIONS.slice() });
+      return true;
+    },
+
+    resetAll: function () {
+      if (window.mockData && typeof window.mockData.resetAndReseed === 'function') {
+        fire('_meta', 'reset', null);
+        return window.mockData.resetAndReseed();
+      }
+      return Promise.reject(new Error('db._meta.resetAll: mock-data not loaded'));
+    },
+
+    seedIfEmpty: function () {
+      if (window.mockData && typeof window.mockData.bootstrap === 'function') {
+        return window.mockData.bootstrap();
+      }
+      return Promise.resolve(false);
+    },
+
+    counts: function () {
+      const out = {};
+      COLLECTIONS.forEach(function (name) {
+        out[name] = read(name).length;
+      });
+      return out;
+    }
+  };
+
   // ---------- Public surface ----------
 
   window.db = {
@@ -757,13 +822,8 @@
     leads: leads,
     flags: flags,
     landings: landings,
-    // Filled by subsequent tasks:
-    orders: null,
-    products: null,
-    leads: null,
-    flags: null,
-    landings: null,
-    _meta: null,
+    _meta: _meta,
+
     // Internal helpers reused by other namespaces
     _internal: {
       read: read,
@@ -774,4 +834,13 @@
       applyFilters: applyFilters
     }
   };
+
+  // db:change CustomEvent contract documented:
+  //
+  //   window.addEventListener('db:change', function (e) {
+  //     const { collection, action, payload } = e.detail;
+  //     // collection: 'users' | 'affiliates' | 'orders' | 'products' | 'leads' | 'flags' | 'landings' | '_meta'
+  //     // action: 'create' | 'update' | 'delete' | 'toggle' | 'set' | 'reorder' | 'import' | 'reset'
+  //     // payload: the affected record (or { id } for deletes, null for reset)
+  //   });
 })();
