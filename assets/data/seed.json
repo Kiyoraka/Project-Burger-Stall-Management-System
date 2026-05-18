@@ -83,7 +83,20 @@
       "createdAt": "2026-04-25T00:00:00.000Z"
     }
   ],
-  "users": [],
+  "users": [
+    { "id": "sel-001", "email": "seller1@bsms.test", "passwordHash": "seller123", "name": "Zaid Hassan", "phone": "0191112222", "stallName": "Zaid's Burger Stall", "slug": "zaid-burger", "status": "active", "subscriptionId": "ord-001", "affiliateId": "aff-001", "createdAt": "2026-01-20T00:00:00.000Z", "approvedAt": "2026-01-21T00:00:00.000Z" },
+    { "id": "sel-002", "email": "siti.aishah@bsms.test", "passwordHash": "seller123", "name": "Siti Aishah", "phone": "0192223333", "stallName": "Siti Burger", "slug": "siti-burger", "status": "active", "subscriptionId": "ord-002", "affiliateId": "aff-002", "createdAt": "2026-02-05T00:00:00.000Z", "approvedAt": "2026-02-06T00:00:00.000Z" },
+    { "id": "sel-003", "email": "hashim.yusof@bsms.test", "passwordHash": "seller123", "name": "Hashim Yusof", "phone": "0193334444", "stallName": "Hashim Bakar", "slug": "hashim-burger", "status": "active", "subscriptionId": "ord-003", "affiliateId": "aff-001", "createdAt": "2026-02-15T00:00:00.000Z", "approvedAt": "2026-02-16T00:00:00.000Z" },
+    { "id": "sel-004", "email": "faizal.ahmad@bsms.test", "passwordHash": "seller123", "name": "Faizal Ahmad", "phone": "0194445555", "stallName": "Faiz Burger", "slug": "faiz-burger", "status": "active", "subscriptionId": "ord-004", "affiliateId": "aff-003", "createdAt": "2026-03-01T00:00:00.000Z", "approvedAt": "2026-03-02T00:00:00.000Z" },
+    { "id": "sel-005", "email": "rosmah.ali@bsms.test", "passwordHash": "seller123", "name": "Rosmah Ali", "phone": "0195556666", "stallName": "Mama Burger", "slug": "mama-burger", "status": "active", "subscriptionId": "ord-005", "affiliateId": "aff-002", "createdAt": "2026-03-10T00:00:00.000Z", "approvedAt": "2026-03-11T00:00:00.000Z" },
+    { "id": "sel-006", "email": "khairul.anwar@bsms.test", "passwordHash": "seller123", "name": "Khairul Anwar", "phone": "0196667777", "stallName": "Anwar Burger Stall", "slug": "anwar-burger", "status": "active", "subscriptionId": "ord-006", "affiliateId": "aff-001", "createdAt": "2026-03-25T00:00:00.000Z", "approvedAt": "2026-03-26T00:00:00.000Z" },
+    { "id": "sel-007", "email": "norhayati.ibrahim@bsms.test", "passwordHash": "seller123", "name": "Norhayati Ibrahim", "phone": "0197778888", "stallName": "Aty Burger", "slug": "aty-burger", "status": "active", "subscriptionId": "ord-007", "affiliateId": "aff-005", "createdAt": "2026-04-08T00:00:00.000Z", "approvedAt": "2026-04-09T00:00:00.000Z" },
+    { "id": "sel-008", "email": "sazali.mohd@bsms.test", "passwordHash": "seller123", "name": "Sazali Mohd", "phone": "0198889999", "stallName": "Sazali Special Burger", "slug": "sazali-special", "status": "active", "subscriptionId": "ord-008", "affiliateId": "aff-001", "createdAt": "2026-04-22T00:00:00.000Z", "approvedAt": "2026-04-23T00:00:00.000Z" },
+    { "id": "sel-009", "email": "mat.tomato@bsms.test", "passwordHash": "seller123", "name": "Mat Tomato", "phone": "0199990000", "stallName": "Mat Tom Burger", "slug": "mat-tomato", "status": "pending", "subscriptionId": null, "affiliateId": "aff-002", "createdAt": "2026-05-14T00:00:00.000Z", "approvedAt": null },
+    { "id": "sel-010", "email": "cikgu.wan@bsms.test", "passwordHash": "seller123", "name": "Cikgu Wan", "phone": "0190001111", "stallName": "Wan's Stall", "slug": "wan-stall", "status": "pending", "subscriptionId": null, "affiliateId": "aff-001", "createdAt": "2026-05-16T00:00:00.000Z", "approvedAt": null },
+    { "id": "sel-011", "email": "borhan.ahmad@bsms.test", "passwordHash": "seller123", "name": "Borhan Ahmad", "phone": "0191230000", "stallName": "Borhan Burger", "slug": "borhan-burger", "status": "suspended", "subscriptionId": "ord-017", "affiliateId": null, "createdAt": "2026-02-28T00:00:00.000Z", "approvedAt": "2026-03-01T00:00:00.000Z" },
+    { "id": "sel-012", "email": "razak.senin@bsms.test", "passwordHash": "seller123", "name": "Razak Senin", "phone": "0192340001", "stallName": "Razak Burger Express", "slug": "razak-burger", "status": "active", "subscriptionId": "ord-018", "affiliateId": "aff-003", "createdAt": "2026-01-08T00:00:00.000Z", "approvedAt": "2026-01-09T00:00:00.000Z" }
+  ],
   "orders": [],
   "products": [],
   "leads": [],
