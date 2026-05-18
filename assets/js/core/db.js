@@ -169,13 +169,114 @@
     }
   };
 
+  // ---------- affiliates ----------
+
+  const affiliates = {
+    list: function (filters) {
+      return applyFilters(read('affiliates'), filters);
+    },
+
+    get: function (id) {
+      const rows = read('affiliates');
+      for (let i = 0; i < rows.length; i++) {
+        if (rows[i].id === id) return rows[i];
+      }
+      return null;
+    },
+
+    getByReferralCode: function (code) {
+      if (!code) return null;
+      const rows = read('affiliates');
+      const target = String(code).toLowerCase();
+      for (let i = 0; i < rows.length; i++) {
+        if (rows[i].referralCode && rows[i].referralCode.toLowerCase() === target) {
+          return rows[i];
+        }
+      }
+      return null;
+    },
+
+    create: function (data) {
+      const rows = read('affiliates');
+      const id = nextId('aff', rows);
+      const record = Object.assign({
+        id: id,
+        email: '',
+        passwordHash: 'aff123',
+        name: '',
+        phone: '',
+        referralCode: '',
+        bankName: null,
+        bankAccount: null,
+        commissionRate: 0.15,
+        totalEarned: 0,
+        totalPaid: 0,
+        status: 'active',
+        createdAt: nowIso()
+      }, data || {}, { id: id });
+      rows.push(record);
+      write('affiliates', rows);
+      fire('affiliates', 'create', record);
+      return record;
+    },
+
+    update: function (id, patch) {
+      const rows = read('affiliates');
+      let updated = null;
+      for (let i = 0; i < rows.length; i++) {
+        if (rows[i].id === id) {
+          rows[i] = Object.assign({}, rows[i], patch || {}, { id: id });
+          updated = rows[i];
+          break;
+        }
+      }
+      if (updated) {
+        write('affiliates', rows);
+        fire('affiliates', 'update', updated);
+      }
+      return updated;
+    },
+
+    suspend: function (id) {
+      return affiliates.update(id, { status: 'suspended' });
+    }
+  };
+
+  // ---------- admins ----------
+
+  const admins = {
+    list: function (filters) {
+      return applyFilters(read('admins'), filters);
+    },
+
+    get: function (id) {
+      const rows = read('admins');
+      for (let i = 0; i < rows.length; i++) {
+        if (rows[i].id === id) return rows[i];
+      }
+      return null;
+    },
+
+    getByEmail: function (email) {
+      if (!email) return null;
+      const rows = read('admins');
+      const target = String(email).toLowerCase();
+      for (let i = 0; i < rows.length; i++) {
+        if (rows[i].email && rows[i].email.toLowerCase() === target) {
+          return rows[i];
+        }
+      }
+      return null;
+    }
+  };
+
   // ---------- Public surface ----------
 
   window.db = {
     users: users,
+    affiliates: affiliates,
+    admins: admins,
     // Filled by subsequent tasks:
-    affiliates: null,
-    admins: null,
     orders: null,
     products: null,
     leads: null,
