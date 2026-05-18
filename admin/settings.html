@@ -45,15 +45,78 @@
           <p class="text-sm text-slate-400">Default plan price + commission rate wires up in Phase 3.</p>
         </section>
 
-        <section class="bg-white rounded-xl p-5 border border-red-200 bg-red-50/30">
+        <section class="bg-white rounded-xl p-5 border border-red-200 bg-red-50/30"
+                 x-data="dangerZone()">
           <h2 class="text-sm font-semibold text-red-700 mb-3">Danger Zone</h2>
-          <div class="space-y-2">
-            <button disabled class="w-full sm:w-auto rounded-lg border border-red-300 px-4 py-2 text-sm text-red-700 bg-white">! Reset Demo Data</button>
-            <button disabled class="w-full sm:w-auto rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 bg-white">Export Current State</button>
-            <button disabled class="w-full sm:w-auto rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 bg-white">Import State (JSON)</button>
+
+          <!-- Confirm dialog -->
+          <div x-show="confirmingReset" x-cloak
+               class="mb-4 rounded-lg bg-white border border-red-300 p-4 shadow-sm">
+            <p class="text-sm font-medium text-red-800">Reset all demo data?</p>
+            <p class="mt-1 text-xs text-red-600">
+              This wipes every <code class="px-1 rounded bg-red-50">bsms.*</code> localStorage key, reseeds from <code class="px-1 rounded bg-red-50">seed.json</code>, and signs you out. The page reloads back to the home splash.
+            </p>
+            <div class="mt-3 flex flex-wrap items-center gap-2">
+              <button type="button"
+                      :disabled="resetting"
+                      @click="confirmReset()"
+                      class="rounded-lg bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 text-sm font-semibold disabled:opacity-60 disabled:cursor-wait">
+                <span x-show="!resetting">Yes, reset everything</span>
+                <span x-show="resetting" x-cloak>Resetting…</span>
+              </button>
+              <button type="button"
+                      :disabled="resetting"
+                      @click="confirmingReset = false"
+                      class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50">
+                Cancel
+              </button>
+            </div>
           </div>
-          <p class="mt-3 text-xs text-slate-500">Reset / Export / Import handlers wire up in Phase 2 Task 29 and Phase 3 Task 12.</p>
+
+          <div class="space-y-2" x-show="!confirmingReset">
+            <button type="button"
+                    @click="confirmingReset = true"
+                    class="w-full sm:w-auto rounded-lg border border-red-300 hover:border-red-500 hover:bg-red-50 px-4 py-2 text-sm text-red-700 bg-white transition">
+              ! Reset Demo Data
+            </button>
+            <button disabled class="w-full sm:w-auto rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-400 bg-white">Export Current State</button>
+            <button disabled class="w-full sm:w-auto rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-400 bg-white">Import State (JSON)</button>
+          </div>
+
+          <p class="mt-3 text-xs text-slate-500">Export + Import handlers land in Phase 3 Task 12.</p>
+
+          <p x-show="error" x-cloak class="mt-3 text-sm text-red-700" x-text="error"></p>
         </section>
+
+        <script>
+          function dangerZone() {
+            return {
+              confirmingReset: false,
+              resetting: false,
+              error: '',
+
+              async confirmReset() {
+                this.error = '';
+                this.resetting = true;
+                try {
+                  if (!window.db || !window.db._meta || typeof window.db._meta.resetAll !== 'function') {
+                    throw new Error('db._meta.resetAll not available');
+                  }
+                  await window.db._meta.resetAll();
+                  if (window.auth && window.auth.logout) {
+                    window.auth.logout();
+                  }
+                  // Replace not assign so the back button cannot resurrect the signed-in admin URL
+                  window.location.replace('/index.html?reset=1');
+                } catch (e) {
+                  console.error('[bsms] reset failed', e);
+                  this.error = 'Reset failed: ' + (e && e.message ? e.message : 'unknown error');
+                  this.resetting = false;
+                }
+              }
+            };
+          }
+        </script>
 
       </main>
     </div>
