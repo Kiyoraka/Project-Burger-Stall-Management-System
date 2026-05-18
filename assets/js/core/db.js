@@ -270,12 +270,142 @@
     }
   };
 
+  // ---------- orders (subscriptions) ----------
+
+  const PLAN_PRICE = 49;
+  const SUB_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+  const orders = {
+    list: function (filters) {
+      const rows = read('orders');
+      if (!filters) return rows.slice().sort(byCreatedDesc);
+      let out = rows;
+      if (filters.sellerId) {
+        out = out.filter(function (r) { return r.sellerId === filters.sellerId; });
+      }
+      if (filters.affiliateId) {
+        out = out.filter(function (r) { return r.affiliateId === filters.affiliateId; });
+      }
+      if (filters.status) {
+        out = out.filter(function (r) { return r.status === filters.status; });
+      }
+      if (filters.startDate) {
+        const after = new Date(filters.startDate).getTime();
+        out = out.filter(function (r) { return r.createdAt && new Date(r.createdAt).getTime() >= after; });
+      }
+      if (filters.endDate) {
+        const before = new Date(filters.endDate).getTime();
+        out = out.filter(function (r) { return r.createdAt && new Date(r.createdAt).getTime() <= before; });
+      }
+      if (filters.search) {
+        const q = String(filters.search).toLowerCase().trim();
+        if (q) {
+          out = out.filter(function (r) {
+            return (r.id && r.id.toLowerCase().indexOf(q) !== -1) ||
+                   (r.paymentRef && r.paymentRef.toLowerCase().indexOf(q) !== -1);
+          });
+        }
+      }
+      return out.slice().sort(byCreatedDesc);
+    },
+
+    get: function (id) {
+      const rows = read('orders');
+      for (let i = 0; i < rows.length; i++) {
+        if (rows[i].id === id) return rows[i];
+      }
+      return null;
+    },
+
+    activeForSeller: function (sellerId) {
+      if (!sellerId) return null;
+      const rows = read('orders');
+      for (let i = 0; i < rows.length; i++) {
+        if (rows[i].sellerId === sellerId && rows[i].status === 'active') return rows[i];
+      }
+      return null;
+    },
+
+    create: function (data) {
+      const rows = read('orders');
+      const id = nextId('ord', rows);
+      const affiliateId = (data && data.affiliateId) || null;
+      const rate = affiliateId ? lookupAffiliateRate(affiliateId) : 0;
+      const amount = (data && data.amount) || PLAN_PRICE;
+      const record = Object.assign({
+        id: id,
+        sellerId: null,
+        plan: 'Standard',
+        amount: amount,
+        status: 'pending',
+        startDate: null,
+        endDate: null,
+        paymentMethod: 'Online Banking',
+        paymentRef: null,
+        affiliateId: affiliateId,
+        commissionAmount: parseFloat((amount * rate).toFixed(2)),
+        createdAt: nowIso()
+      }, data || {}, { id: id });
+      rows.push(record);
+      write('orders', rows);
+      fire('orders', 'create', record);
+      return record;
+    },
+
+    activate: function (id) {
+      const start = new Date();
+      const end = new Date(start.getTime() + SUB_DURATION_MS);
+      return updateOrder(id, {
+        status: 'active',
+        startDate: start.toISOString(),
+        endDate: end.toISOString()
+      });
+    },
+
+    expire: function (id) {
+      return updateOrder(id, { status: 'expired' });
+    },
+
+    cancel: function (id) {
+      return updateOrder(id, { status: 'cancelled' });
+    }
+  };
+
+  function byCreatedDesc(a, b) {
+    const at = a && a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const bt = b && b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return bt - at;
+  }
+
+  function lookupAffiliateRate(affiliateId) {
+    const aff = read('affiliates').find(function (a) { return a.id === affiliateId; });
+    return aff && typeof aff.commissionRate === 'number' ? aff.commissionRate : 0.15;
+  }
+
+  function updateOrder(id, patch) {
+    const rows = read('orders');
+    let updated = null;
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i].id === id) {
+        rows[i] = Object.assign({}, rows[i], patch || {}, { id: id });
+        updated = rows[i];
+        break;
+      }
+    }
+    if (updated) {
+      write('orders', rows);
+      fire('orders', 'update', updated);
+    }
+    return updated;
+  }
+
   // ---------- Public surface ----------
 
   window.db = {
     users: users,
     affiliates: affiliates,
     admins: admins,
+    orders: orders,
     // Filled by subsequent tasks:
     orders: null,
     products: null,
