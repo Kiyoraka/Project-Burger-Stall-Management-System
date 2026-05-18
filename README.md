@@ -14,17 +14,13 @@ A static SaaS prototype for Malaysian burger stall sellers. Sellers subscribe �
 
 ## Run Locally
 
-The app must be served over HTTP — `file://` breaks localStorage scope and fetch.
+The app must be served over HTTP — `file://` breaks localStorage scope and `fetch` for `seed.json`. The stack is pure vanilla (no npm, no Python, no build), so use the **VS Code Live Server** extension.
 
-```bash
-# Option A: Python (recommended)
-python -m http.server 8080
+1. Install the [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) extension in VS Code.
+2. Right-click `index.html` in the file explorer → **Open with Live Server**.
+3. Your browser opens at <http://127.0.0.1:5500/> (default port — Live Server picks the port).
 
-# Option B: VS Code Live Server extension
-# Right-click index.html → "Open with Live Server"
-```
-
-Then open <http://localhost:8080/>.
+If you prefer a different editor, any zero-dependency static file server works (e.g. the IntelliJ built-in browser, Brackets, or VS Code's "Five Server" fork). The contract: serve the project root over HTTP — no Python, no Node.
 
 ## Demo Credentials
 
@@ -36,7 +32,7 @@ Seeded into localStorage on first visit. Reset via `/admin/settings.html → Res
 | Affiliate | `affiliate1@bsms.test` | `aff123` |
 | Seller | `seller1@bsms.test` | `seller123` |
 
-Public seller landing (no login): <http://localhost:8080/site/index.html?seller=zaid-burger>
+Public seller landing (no login): `/site/index.html?seller=zaid-burger` (relative to whatever port Live Server picks)
 
 ## Shared CDN Head Snippet
 
