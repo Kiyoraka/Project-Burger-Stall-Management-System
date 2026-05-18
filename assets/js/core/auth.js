@@ -151,9 +151,47 @@
       return window.db.flags.isEnabled(key);
     },
 
-    // requireRole: installed by Task 20 (auth-guard.js extension)
-    requireRole: function () {
-      console.warn('[bsms.auth] requireRole called but not yet installed (Phase 2 Task 20)');
+    /**
+     * requireRole(expectedRole) — page-level guard
+     *
+     * Call as the first line of a page controller (or inline). Behavior:
+     *   1. No session       → redirect to /{expected}/login.html?next={current}
+     *   2. Expired session  → cleared then treated as case 1
+     *   3. Wrong role       → redirect to /{session.role}/dashboard.html?wrongPortal=1
+     *   4. Match            → returns the hydrated currentUser record
+     *
+     * Returns the current user record on success, or never returns (page is replaced).
+     */
+    requireRole: function (expectedRole) {
+      if (VALID_ROLES.indexOf(expectedRole) === -1) {
+        console.error('[bsms.auth] requireRole: invalid expectedRole', expectedRole);
+        return null;
+      }
+
+      const raw = readSession();
+      // Case 1 + 2: no session or expired
+      if (!raw || isExpired(raw)) {
+        if (raw) lsRemove(SESSION_KEY);
+        const next = encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.replace('/' + expectedRole + '/login.html?next=' + next);
+        return null;
+      }
+
+      // Case 3: wrong role
+      if (raw.role !== expectedRole) {
+        window.location.replace('/' + raw.role + '/dashboard.html?wrongPortal=1');
+        return null;
+      }
+
+      // Case 4: match - hydrate fresh record
+      const record = auth.currentUser();
+      if (!record) {
+        // Underlying record vanished between readSession and currentUser - send to login
+        const next = encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.replace('/' + expectedRole + '/login.html?next=' + next);
+        return null;
+      }
+      return record;
     },
 
     // Constants surface for callers
