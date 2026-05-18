@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Menu Items | BSMS Seller</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script defer src="/assets/js/components/topbar.js"></script>
+  <script defer src="/assets/js/components/sidebar-seller.js"></script>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%94%3C/text%3E%3C/svg%3E" />
+  <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body data-nav="products" class="min-h-screen bg-slate-50 text-slate-800 font-sans antialiased">
+  <div class="flex min-h-screen">
+    <div x-data="sidebarSeller" x-html="template()"></div>
+    <div class="flex-1 flex flex-col min-w-0">
+      <header class="bg-white border-b border-slate-200">
+        <div class="px-6 py-4 flex items-center justify-between">
+          <div>
+            <h1 class="text-xl font-semibold text-slate-800">Menu Items</h1>
+            <p class="text-xs text-slate-500">Your stall's menu</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <a href="/seller/product-edit.html" class="rounded-lg bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 text-sm font-medium">+ Add Product</a>
+            <div x-data="topbar" x-html="template()"></div>
+          </div>
+        </div>
+      </header>
+      <main class="flex-1 p-6 space-y-4">
+
+        <section class="bg-white rounded-xl p-4 border border-slate-200 flex flex-wrap gap-3 items-center">
+          <input type="search" placeholder="Search products..." disabled
+                 class="flex-1 min-w-[200px] rounded-lg border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-50" />
+          <select disabled class="rounded-lg border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-50">
+            <option>All categories</option>
+          </select>
+        </section>
+
+        <section class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+              <tr>
+                <th class="px-4 py-3">Photo</th>
+                <th class="px-4 py-3">Name</th>
+                <th class="px-4 py-3">Category</th>
+                <th class="px-4 py-3">Price</th>
+                <th class="px-4 py-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="5" class="px-4 py-12 text-center text-sm text-slate-400">
+                  Products table wires up in Phase 4. Drag-to-reorder lands in Phase 4 Task 4.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+      </main>
+    </div>
+  </div>
+</body>
+</html>
