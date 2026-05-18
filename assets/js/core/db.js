@@ -614,6 +614,138 @@
     }
   };
 
+  // ---------- flags (feature flags) ----------
+
+  const flags = {
+    list: function () {
+      return read('flags').slice();
+    },
+
+    get: function (key) {
+      const rows = read('flags');
+      for (let i = 0; i < rows.length; i++) {
+        if (rows[i].key === key) return rows[i];
+      }
+      return null;
+    },
+
+    isEnabled: function (key) {
+      const flag = flags.get(key);
+      return !!(flag && flag.enabled);
+    },
+
+    toggle: function (key, updatedBy) {
+      const rows = read('flags');
+      let updated = null;
+      for (let i = 0; i < rows.length; i++) {
+        if (rows[i].key === key) {
+          rows[i] = Object.assign({}, rows[i], {
+            enabled: !rows[i].enabled,
+            updatedAt: nowIso(),
+            updatedBy: updatedBy || rows[i].updatedBy || null
+          });
+          updated = rows[i];
+          break;
+        }
+      }
+      if (updated) {
+        write('flags', rows);
+        fire('flags', 'toggle', updated);
+      }
+      return updated;
+    },
+
+    set: function (key, enabled, updatedBy) {
+      const rows = read('flags');
+      let updated = null;
+      for (let i = 0; i < rows.length; i++) {
+        if (rows[i].key === key) {
+          rows[i] = Object.assign({}, rows[i], {
+            enabled: !!enabled,
+            updatedAt: nowIso(),
+            updatedBy: updatedBy || rows[i].updatedBy || null
+          });
+          updated = rows[i];
+          break;
+        }
+      }
+      if (updated) {
+        write('flags', rows);
+        fire('flags', 'set', updated);
+      }
+      return updated;
+    }
+  };
+
+  // ---------- landings (seller landing configs) ----------
+
+  const landings = {
+    getBySellerId: function (sellerId) {
+      if (!sellerId) return null;
+      const rows = read('landings');
+      for (let i = 0; i < rows.length; i++) {
+        if (rows[i].sellerId === sellerId) return rows[i];
+      }
+      return null;
+    },
+
+    getBySlug: function (slug) {
+      if (!slug) return null;
+      const sellers = read('users');
+      const slugLower = String(slug).toLowerCase();
+      const seller = sellers.find(function (s) {
+        return s.slug && s.slug.toLowerCase() === slugLower;
+      });
+      if (!seller) return null;
+      const landing = landings.getBySellerId(seller.id);
+      return landing ? Object.assign({}, landing, { seller: seller }) : null;
+    },
+
+    update: function (sellerId, patch) {
+      if (!sellerId) return null;
+      const rows = read('landings');
+      let updated = null;
+      let found = false;
+      for (let i = 0; i < rows.length; i++) {
+        if (rows[i].sellerId === sellerId) {
+          rows[i] = Object.assign({}, rows[i], patch || {}, { sellerId: sellerId });
+          updated = rows[i];
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        const created = Object.assign({
+          sellerId: sellerId,
+          themeColor: 'orange',
+          heroImage: '',
+          hours: { mon: 'closed', tue: 'closed', wed: 'closed', thu: 'closed', fri: 'closed', sat: 'closed', sun: 'closed' },
+          address: '',
+          mapsUrl: '',
+          whatsappNumber: '',
+          callNumber: '',
+          tagline: '',
+          aboutText: '',
+          socialLinks: { fb: '', ig: '', tiktok: '' }
+        }, patch || {}, { sellerId: sellerId });
+        rows.push(created);
+        updated = created;
+      }
+      write('landings', rows);
+      fire('landings', found ? 'update' : 'create', updated);
+      return updated;
+    },
+
+    isSlugTaken: function (slug, excludeSellerId) {
+      if (!slug) return false;
+      const sellers = read('users');
+      const slugLower = String(slug).toLowerCase();
+      return sellers.some(function (s) {
+        return s.slug && s.slug.toLowerCase() === slugLower && s.id !== excludeSellerId;
+      });
+    }
+  };
+
   // ---------- Public surface ----------
 
   window.db = {
@@ -623,6 +755,8 @@
     orders: orders,
     products: products,
     leads: leads,
+    flags: flags,
+    landings: landings,
     // Filled by subsequent tasks:
     orders: null,
     products: null,
