@@ -6,12 +6,16 @@
   <title>Seller Login | BSMS</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script defer src="/assets/js/core/format.js"></script>
+  <script defer src="/assets/js/core/mock-data.js"></script>
+  <script defer src="/assets/js/core/db.js"></script>
+  <script defer src="/assets/js/core/auth.js"></script>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%94%3C/text%3E%3C/svg%3E" />
   <style>[x-cloak] { display: none !important; }</style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 text-slate-800 font-sans antialiased">
   <main class="min-h-screen flex flex-col items-center justify-center px-6 py-12">
-    <div class="w-full max-w-sm">
+    <div class="w-full max-w-sm" x-data="sellerLogin()" x-init="init()">
 
       <div class="text-center mb-6">
         <span class="text-3xl" aria-hidden="true">🧑‍🍳</span>
@@ -19,32 +23,53 @@
         <p class="text-sm text-slate-500">Manage your burger stall</p>
       </div>
 
-      <form class="bg-white rounded-2xl shadow-md p-6 space-y-4"
-            x-data="{ email: '', password: '', error: '' }"
-            @submit.prevent="error = 'Login wiring lands in Phase 2'">
+      <div x-show="wrongPortal" x-cloak
+           class="mb-4 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-700">
+        You were redirected here because the previous link required seller access.
+      </div>
+
+      <div x-show="redirectedFromGuard" x-cloak
+           class="mb-4 rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-blue-700">
+        Please sign in to continue.
+      </div>
+
+      <div x-show="pendingApproval" x-cloak
+           class="mb-4 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-700">
+        Your account is pending admin approval. You will be able to sign in once approved.
+      </div>
+
+      <form class="bg-white rounded-2xl shadow-md p-6 space-y-4" @submit.prevent="submit()">
 
         <div>
           <label for="email" class="block text-sm font-medium text-slate-700 mb-1">Email</label>
           <input id="email" type="email" required autocomplete="email"
-                 x-model="email"
+                 x-model.trim="email"
+                 :disabled="loading"
                  placeholder="seller1@bsms.test"
-                 class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
+                 class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent disabled:bg-slate-50" />
         </div>
 
         <div>
           <label for="password" class="block text-sm font-medium text-slate-700 mb-1">Password</label>
           <input id="password" type="password" required autocomplete="current-password"
                  x-model="password"
+                 :disabled="loading"
                  placeholder="••••••••"
-                 class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
+                 class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent disabled:bg-slate-50" />
         </div>
 
-        <p x-show="error" x-cloak class="text-sm text-amber-600" x-text="error"></p>
+        <p x-show="error" x-cloak class="text-sm text-red-600" x-text="error"></p>
 
         <button type="submit"
-                class="w-full rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 transition">
-          Sign in
+                :disabled="loading"
+                class="w-full rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 transition disabled:opacity-60 disabled:cursor-wait">
+          <span x-show="!loading">Sign in</span>
+          <span x-show="loading" x-cloak>Signing in…</span>
         </button>
+
+        <p class="text-xs text-slate-500 text-center pt-2">
+          Demo: <code class="px-1 py-0.5 rounded bg-slate-100">seller1@bsms.test / seller123</code>
+        </p>
       </form>
 
       <p class="mt-6 text-center text-sm text-slate-500">
@@ -57,5 +82,79 @@
       </p>
     </div>
   </main>
+
+  <script>
+    function sellerLogin() {
+      return {
+        email: '',
+        password: '',
+        error: '',
+        loading: false,
+        wrongPortal: false,
+        redirectedFromGuard: false,
+        pendingApproval: false,
+
+        init() {
+          const params = new URLSearchParams(window.location.search);
+          this.wrongPortal = params.get('wrongPortal') === '1';
+          this.redirectedFromGuard = params.has('next');
+          if (window.auth && window.auth.isAuthed && window.auth.isAuthed()) {
+            const me = window.auth.currentUser();
+            if (me && me.role === 'seller') {
+              this._gotoNext();
+            }
+          }
+        },
+
+        async submit() {
+          this.error = '';
+          this.pendingApproval = false;
+          if (!this.email || !this.password) {
+            this.error = 'Email and password are required.';
+            return;
+          }
+          this.loading = true;
+          try {
+            if (window.mockData && window.mockData.bootstrap) {
+              await window.mockData.bootstrap();
+            }
+            const session = window.auth.login('seller', this.email, this.password);
+            if (!session) {
+              // Distinguish suspended vs not-yet-approved vs wrong-credentials for nicer UX
+              const all = window.db.users.list();
+              const target = this.email.toLowerCase();
+              const record = all.find(function (r) { return r.email && r.email.toLowerCase() === target; });
+              if (record && record.passwordHash === this.password && record.status === 'pending') {
+                this.pendingApproval = true;
+                this.error = '';
+              } else {
+                this.error = 'Invalid email or password (or this account is suspended).';
+              }
+              this.loading = false;
+              return;
+            }
+            this._gotoNext();
+          } catch (e) {
+            console.error(e);
+            this.error = 'Something went wrong. Try again.';
+            this.loading = false;
+          }
+        },
+
+        _gotoNext() {
+          const params = new URLSearchParams(window.location.search);
+          const raw = params.get('next');
+          let next = '/seller/dashboard.html';
+          if (raw) {
+            try {
+              const decoded = decodeURIComponent(raw);
+              if (decoded.startsWith('/seller/')) next = decoded;
+            } catch (e) { /* ignore */ }
+          }
+          window.location.replace(next);
+        }
+      };
+    }
+  </script>
 </body>
 </html>
