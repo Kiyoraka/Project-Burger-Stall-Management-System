@@ -513,6 +513,107 @@
     }
   };
 
+  // ---------- leads (incoming orders) ----------
+
+  const LEAD_STATUSES = ['new', 'contacted', 'fulfilled', 'lost'];
+  const LEAD_SOURCES = ['whatsapp', 'call', 'walkin'];
+
+  const leads = {
+    statuses: LEAD_STATUSES.slice(),
+    sources: LEAD_SOURCES.slice(),
+
+    listBySeller: function (sellerId, filters) {
+      if (!sellerId) return [];
+      let out = read('leads').filter(function (l) { return l.sellerId === sellerId; });
+      if (filters && filters.status) {
+        out = out.filter(function (l) { return l.status === filters.status; });
+      }
+      if (filters && filters.source) {
+        out = out.filter(function (l) { return l.source === filters.source; });
+      }
+      if (filters && filters.search) {
+        const q = String(filters.search).toLowerCase().trim();
+        if (q) {
+          out = out.filter(function (l) {
+            return (l.customerName && l.customerName.toLowerCase().indexOf(q) !== -1) ||
+                   (l.customerPhone && l.customerPhone.indexOf(q) !== -1) ||
+                   (l.notes && l.notes.toLowerCase().indexOf(q) !== -1);
+          });
+        }
+      }
+      return out.sort(function (a, b) {
+        const at = a.receivedAt ? new Date(a.receivedAt).getTime() : 0;
+        const bt = b.receivedAt ? new Date(b.receivedAt).getTime() : 0;
+        return bt - at;
+      });
+    },
+
+    listAllAcrossSellers: function (filters) {
+      // For admin/dashboard Today's Leads cross-seller count
+      let out = read('leads');
+      if (filters && filters.since) {
+        const after = new Date(filters.since).getTime();
+        out = out.filter(function (l) {
+          return l.receivedAt && new Date(l.receivedAt).getTime() >= after;
+        });
+      }
+      return out;
+    },
+
+    get: function (id) {
+      const rows = read('leads');
+      for (let i = 0; i < rows.length; i++) {
+        if (rows[i].id === id) return rows[i];
+      }
+      return null;
+    },
+
+    create: function (data) {
+      const rows = read('leads');
+      const id = nextId('led', rows);
+      const items = (data && Array.isArray(data.items)) ? data.items : [];
+      const totalAmount = (data && typeof data.totalAmount === 'number')
+        ? data.totalAmount
+        : items.reduce(function (sum, it) {
+            return sum + ((it.priceAtOrder || 0) * (it.qty || 0));
+          }, 0);
+      const record = Object.assign({
+        id: id,
+        sellerId: null,
+        customerName: '',
+        customerPhone: '',
+        items: items,
+        totalAmount: parseFloat(totalAmount.toFixed(2)),
+        notes: '',
+        source: 'whatsapp',
+        status: 'new',
+        receivedAt: nowIso()
+      }, data || {}, { id: id, items: items, totalAmount: parseFloat(totalAmount.toFixed(2)) });
+      rows.push(record);
+      write('leads', rows);
+      fire('leads', 'create', record);
+      return record;
+    },
+
+    updateStatus: function (id, status) {
+      if (LEAD_STATUSES.indexOf(status) === -1) return null;
+      const rows = read('leads');
+      let updated = null;
+      for (let i = 0; i < rows.length; i++) {
+        if (rows[i].id === id) {
+          rows[i] = Object.assign({}, rows[i], { status: status });
+          updated = rows[i];
+          break;
+        }
+      }
+      if (updated) {
+        write('leads', rows);
+        fire('leads', 'update', updated);
+      }
+      return updated;
+    }
+  };
+
   // ---------- Public surface ----------
 
   window.db = {
@@ -521,6 +622,7 @@
     admins: admins,
     orders: orders,
     products: products,
+    leads: leads,
     // Filled by subsequent tasks:
     orders: null,
     products: null,
