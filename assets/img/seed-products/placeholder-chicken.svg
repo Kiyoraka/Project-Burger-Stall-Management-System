@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Chicken placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fef3c7"/>
+      <stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg)"/>
+  <text x="200" y="170" text-anchor="middle" font-size="120" font-family="Apple Color Emoji, Segoe UI Emoji, sans-serif">🍗</text>
+  <text x="200" y="240" text-anchor="middle" font-size="14" fill="#92400e" font-family="system-ui, sans-serif" font-weight="600" letter-spacing="2">CHICKEN</text>
+</svg>
