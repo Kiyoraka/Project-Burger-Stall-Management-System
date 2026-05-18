@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "generatedAt": "2026-05-18T00:00:00.000Z",
+  "admins": [
+    {
+      "id": "adm-001",
+      "email": "admin@bsms.test",
+      "passwordHash": "admin123",
+      "name": "Aisyah Razak",
+      "role": "superadmin",
+      "createdAt": "2026-01-10T00:00:00.000Z"
+    },
+    {
+      "id": "adm-002",
+      "email": "support@bsms.test",
+      "passwordHash": "admin123",
+      "name": "Hafiz Lim",
+      "role": "admin",
+      "createdAt": "2026-02-14T00:00:00.000Z"
+    },
+    {
+      "id": "adm-003",
+      "email": "ops@bsms.test",
+      "passwordHash": "admin123",
+      "name": "Nadiah Kassim",
+      "role": "admin",
+      "createdAt": "2026-03-05T00:00:00.000Z"
+    }
+  ],
+  "affiliates": [],
+  "users": [],
+  "orders": [],
+  "products": [],
+  "leads": [],
+  "flags": [],
+  "landings": []
+}
